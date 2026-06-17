@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Project artifacts
+artifacts/
+runs/
+*.pt
+*.bin
+*.npy
+*.npz
+.cache/
+models_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# uv lockfile (library: not versioned)
+uv.lock
+
+# Intake provenance (internal, never published)
+.intake-provenance.local

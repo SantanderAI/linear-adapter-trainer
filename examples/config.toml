@@ -1,0 +1,63 @@
+# Example configuration for LinearAdapterTrainer.
+#
+# This example is fully offline: it uses the dependency-free HashingEmbedder
+# and the TemplateQueryGenerator so it runs in CI without downloads or API
+# keys. For real results, switch the [embedder] and [query_generator] backends
+# to "sentence-transformers" / "openai" and "llm" respectively.
+
+[knowledge_base]
+path = "examples/data/sample_kb.jsonl"
+format = "jsonl"
+text_key = "text"
+id_key = "id"
+
+[embedder]
+backend = "hashing"   # hashing | sentence-transformers | openai
+dimension = 512
+
+[query_generator]
+backend = "template"  # template | llm
+seed = 0
+
+# Optional: synthesise hard negatives with an LLM instead of mining them from
+# the corpus. With backend = "llm" the [dataset] strategy/mix/pool_size below are
+# ignored and negatives become plausible-but-wrong passages on the same topic
+# (stored as text on each triplet). Default "none" keeps this example offline.
+[negative_generator]
+backend = "none"      # none | llm
+# model = "gpt-5-mini"
+
+[dataset]
+queries_per_chunk = 4
+negatives_per_query = 2
+strategy = "mixed"          # random | semantic_opposite | hard | mixed
+pool_size = 8
+val_fraction = 0.25
+# How to hold out validation: "chunk" generalizes to unseen corpus chunks;
+# "query" holds out queries while keeping the corpus visible (the realistic
+# setting for a query-side adapter, and where it can actually beat the baseline).
+split_strategy = "chunk"    # chunk | query
+seed = 0
+max_workers = 1       # >1 generates queries for several chunks in parallel (speeds up the LLM backend)
+
+[dataset.mix]
+semantic_opposite = 0.5
+hard = 0.3
+random = 0.2
+
+[training]
+epochs = 30
+batch_size = 32
+learning_rate = 0.005
+margin = 0.2
+distance = "cosine"
+residual = true
+monitor = "mrr"
+patience = 6
+eval_ks = [1, 3, 5, 10]
+seed = 0
+
+[output]
+dataset_dir = "examples/artifacts/dataset"
+adapter_path = "examples/artifacts/adapter.pt"
+metrics_path = "examples/artifacts/metrics.json"

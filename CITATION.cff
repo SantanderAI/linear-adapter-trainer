@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "LinearAdapterTrainer: linear embedding adapters with triplet loss for retrieval"
+abstract: >-
+  An AI / machine learning Python library that trains linear embedding adapters
+  with triplet loss to align retrieval embeddings with user queries, improving
+  retrieval-augmented generation (RAG) without retraining the base embedding
+  model.
+type: software
+authors:
+  - name: "Santander AI Lab"
+repository-code: "https://github.com/SantanderAI/linear-adapter-trainer"
+url: "https://github.com/SantanderAI/linear-adapter-trainer"
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-06-17
+keywords:
+  - ai
+  - machine-learning
+  - embeddings
+  - retrieval
+  - rag
+  - triplet-loss
