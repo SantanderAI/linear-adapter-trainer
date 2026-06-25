@@ -32,11 +32,12 @@ negatives.
 ## Knowledge base
 
 ```python
-from linear_adapter_trainer import KnowledgeBase, Chunk, TextSplitter
+from linear_adapter_trainer import KnowledgeBase, Chunk, LinkupWebLoader, TextSplitter
 
 kb = KnowledgeBase.from_jsonl("kb.jsonl")           # {"id","text", ...} per line
 kb = KnowledgeBase.from_texts(["a", "b"], ids=...)  # from raw strings
 kb = KnowledgeBase.from_directory("docs/", glob="*.txt")
+kb = LinkupWebLoader().load_urls(["https://example.com/docs"])
 
 kb.get("chunk-1")        # Chunk lookup by id
 kb.ids, kb.texts         # parallel lists
@@ -55,6 +56,32 @@ chunked_kb = splitter.split_knowledge_base(kb)   # child ids like "doc::0"
 
 The splitter is recursive and separator-aware (`\n\n`, `\n`, `. `, ` `), with
 deterministic output.
+
+### Linkup web ingestion
+
+Install the optional extra when you want to build a RAG corpus from known public
+web pages:
+
+```bash
+pip install "linear-adapter-trainer[linkup]"
+export LINKUP_API_KEY=...
+```
+
+```python
+from linear_adapter_trainer import LinkupWebLoader, TextSplitter
+
+loader = LinkupWebLoader(render_js=True)
+kb = loader.load_and_split_urls(
+    ["https://example.com/docs"],
+    splitter=TextSplitter(chunk_size=512, chunk_overlap=64),
+)
+```
+
+Linkup is optimized for AI-agent search and research: the fetch path returns
+clean, sourced, trusted content and rich snippets instead of raw HTML. That
+makes the resulting corpus easier to ground and helps reduce hallucination risk
+in downstream retrieval workflows. For security-sensitive workflows, Linkup also
+offers zero-data-retention options.
 
 ---
 
@@ -216,7 +243,7 @@ Aggregated keys include `precision@k`, `recall@k`, `hit_rate@k`, `ndcg@k`, and
 `linear-adapter <command> config.toml` reads these tables:
 
 ```toml
-[knowledge_base]   # path, format ("jsonl"|"directory"), text_key, id_key, glob
+[knowledge_base]   # path/urls, format ("jsonl"|"directory"|"linkup_fetch"), text_key, id_key, glob
 [embedder]         # backend, model, dimension/dimensions, device, batch_size
 [query_generator]  # backend ("template"|"llm"), model, temperature (optional), seed
 [dataset]          # queries_per_chunk, negatives_per_query, strategy, pool_size, val_fraction, seed, max_workers
@@ -225,8 +252,9 @@ Aggregated keys include `precision@k`, `recall@k`, `hit_rate@k`, `ndcg@k`, and
 [output]           # dataset_dir, adapter_path, metrics_path
 ```
 
-See [`examples/config.toml`](examples/config.toml) for a complete, runnable
-example.
+See [`examples/config.toml`](examples/config.toml) for a complete offline
+example and [`examples/linkup_fetch_config.toml`](examples/linkup_fetch_config.toml)
+for a known-URL web ingestion example.
 
 ---
 

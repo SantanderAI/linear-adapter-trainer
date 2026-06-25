@@ -32,15 +32,25 @@ def load_config(path: str | Path) -> dict[str, Any]:
 def build_knowledge_base(spec: dict[str, Any]) -> KnowledgeBase:
     """Instantiate a knowledge base from a ``[knowledge_base]`` table."""
     fmt = spec.get("format", "jsonl")
-    path = spec["path"]
     if fmt == "jsonl":
+        path = spec["path"]
         kb = KnowledgeBase.from_jsonl(
             path,
             text_key=spec.get("text_key", "text"),
             id_key=spec.get("id_key", "id"),
         )
     elif fmt == "directory":
+        path = spec["path"]
         kb = KnowledgeBase.from_directory(path, glob=spec.get("glob", "*.txt"))
+    elif fmt == "linkup_fetch":
+        from .knowledge_base.linkup import LinkupWebLoader
+
+        kb = LinkupWebLoader(
+            client=spec.get("client"),
+            render_js=spec.get("render_js", True),
+            include_raw_html=spec.get("include_raw_html", False),
+            extract_images=spec.get("extract_images", False),
+        ).load_urls(spec["urls"], ids=spec.get("ids"))
     else:
         raise ValueError(f"Unsupported knowledge_base.format: {fmt!r}")
 

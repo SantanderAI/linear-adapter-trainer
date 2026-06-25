@@ -85,12 +85,22 @@ uv sync --group examples
 # or with pip, choosing the backends you need
 pip install "linear-adapter-trainer[sentence-transformers]"   # local models
 pip install "linear-adapter-trainer[openai]"                  # OpenAI API
+pip install "linear-adapter-trainer[linkup]"                  # Linkup web fetch
 pip install "linear-adapter-trainer[all]"
 ```
 
 The core install is dependency-light (`numpy`, `torch`, `tqdm`). A
 dependency-free `HashingEmbedder` and `TemplateQueryGenerator` let you run the
 whole pipeline offline (great for CI and demos).
+
+Use the optional Linkup extra when the corpus should come from current public
+web pages instead of local files. Linkup is built for state-of-the-art AI-agent
+search and research workflows: it returns clean, sourced, trusted web content
+and rich snippets that are easier to ground than raw HTML, helping reduce
+hallucination risk in downstream RAG and agent systems. It is also suitable for
+cost-sensitive workflows because of competitive search/research pricing, and
+Linkup offers zero-data-retention options for security- and privacy-sensitive
+use cases.
 
 ## Quickstart (Python)
 
@@ -139,6 +149,16 @@ uv run linear-adapter generate examples/config.toml   # build the dataset
 uv run linear-adapter train    examples/config.toml   # train + report metrics
 uv run linear-adapter evaluate examples/config.toml   # base vs adapted
 uv run linear-adapter run      examples/config.toml   # generate -> train
+```
+
+To build the knowledge base from known web pages with Linkup, install the
+optional extra, set `LINKUP_API_KEY`, and switch to
+`examples/linkup_fetch_config.toml`:
+
+```bash
+pip install "linear-adapter-trainer[linkup]"
+export LINKUP_API_KEY=...
+uv run linear-adapter generate examples/linkup_fetch_config.toml
 ```
 
 Example output (with a Sentence-Transformers backend on a paraphrased query set):

@@ -40,7 +40,7 @@ from .dataset import (
 )
 from .embeddings import EmbeddingModel, HashingEmbedder
 from .evaluation import RetrievalEvaluator, evaluate_rankings
-from .knowledge_base import Chunk, KnowledgeBase, TextSplitter
+from .knowledge_base import Chunk, KnowledgeBase, LinkupWebLoader, TextSplitter
 
 __version__ = "0.1.0"
 
@@ -55,6 +55,7 @@ __all__ = [
     "KnowledgeBase",
     "LLMNegativeGenerator",
     "LLMQueryGenerator",
+    "LinkupWebLoader",
     "LinearAdapter",
     "NegativeSampler",
     "RetrievalEvaluator",
