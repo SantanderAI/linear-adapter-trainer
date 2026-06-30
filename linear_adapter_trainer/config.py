@@ -42,11 +42,22 @@ def build_knowledge_base(spec: dict[str, Any]) -> KnowledgeBase:
     elif fmt == "directory":
         path = spec["path"]
         kb = KnowledgeBase.from_directory(path, glob=spec.get("glob", "*.txt"))
-    elif fmt == "linkup_fetch":
-        from .knowledge_base.linkup import LinkupWebLoader
+    elif fmt == "web_fetch":
+        from .knowledge_base.web import WebLoader
 
-        kb = LinkupWebLoader(
-            client=spec.get("client"),
+        client = spec.get("client")
+        if client is None:
+            backend = spec.get("backend")
+            if not backend:
+                raise ValueError(
+                    "web_fetch requires either a `client` or a `backend` "
+                    "naming an optional web-fetch adapter (e.g. backend = \"linkup\")."
+                )
+            from .knowledge_base.web_adapters import build_web_fetch_client
+
+            client = build_web_fetch_client(backend)
+        kb = WebLoader(
+            client=client,
             render_js=spec.get("render_js", True),
             include_raw_html=spec.get("include_raw_html", False),
             extract_images=spec.get("extract_images", False),

@@ -4,7 +4,8 @@
 import pytest
 
 from linear_adapter_trainer.config import build_knowledge_base
-from linear_adapter_trainer.knowledge_base import LinkupWebLoader, TextSplitter
+from linear_adapter_trainer.knowledge_base import TextSplitter, WebLoader
+from linear_adapter_trainer.knowledge_base.web_adapters import build_web_fetch_client
 
 
 class RecordingClient:
@@ -17,7 +18,7 @@ class RecordingClient:
         return self.responses[kwargs["url"]]
 
 
-def test_linkup_loader_fetches_known_urls_into_knowledge_base():
+def test_web_loader_fetches_known_urls_into_knowledge_base():
     client = RecordingClient(
         {
             "https://example.com/risk": {
@@ -25,12 +26,12 @@ def test_linkup_loader_fetches_known_urls_into_knowledge_base():
                 "title": "Risk overview",
             },
             "https://example.com/governance": {
-                "markdown": "# Governance\n\nClean markdown from Linkup.",
+                "markdown": "# Governance\n\nClean markdown content.",
             },
         }
     )
 
-    kb = LinkupWebLoader(client=client).load_urls(
+    kb = WebLoader(client=client).load_urls(
         ["https://example.com/risk", "https://example.com/governance"],
         ids=["risk", "governance"],
     )
@@ -40,7 +41,6 @@ def test_linkup_loader_fetches_known_urls_into_knowledge_base():
     assert kb.get("risk").metadata == {
         "source": "https://example.com/risk",
         "source_url": "https://example.com/risk",
-        "fetched_with": "linkup",
         "title": "Risk overview",
     }
     assert client.calls == [
@@ -59,7 +59,7 @@ def test_linkup_loader_fetches_known_urls_into_knowledge_base():
     ]
 
 
-def test_linkup_loader_can_split_fetched_pages():
+def test_web_loader_can_split_fetched_pages():
     client = RecordingClient(
         {
             "https://example.com/report": {
@@ -68,29 +68,39 @@ def test_linkup_loader_can_split_fetched_pages():
         }
     )
 
-    kb = LinkupWebLoader(client=client).load_and_split_urls(
+    kb = WebLoader(client=client).load_and_split_urls(
         ["https://example.com/report"],
         splitter=TextSplitter(chunk_size=35, chunk_overlap=5),
     )
 
     assert len(kb) > 1
     assert all(chunk.metadata["source_url"] == "https://example.com/report" for chunk in kb)
-    assert all(chunk.metadata["parent_id"] == "linkup-0" for chunk in kb)
+    assert all(chunk.metadata["parent_id"] == "web-0" for chunk in kb)
 
 
-def test_linkup_loader_requires_optional_dependency_without_client():
-    with pytest.raises(ImportError, match="linear-adapter-trainer\\[linkup\\]"):
-        LinkupWebLoader().load_urls(["https://example.com"])
+def test_web_loader_requires_a_client():
+    with pytest.raises(TypeError):
+        WebLoader()  # type: ignore[call-arg]
 
 
-def test_config_builds_linkup_fetch_knowledge_base_with_injected_client():
+def test_unknown_web_fetch_backend_is_rejected():
+    with pytest.raises(ValueError, match="Unknown web_fetch backend"):
+        build_web_fetch_client("does-not-exist")
+
+
+def test_web_fetch_config_requires_client_or_backend():
+    with pytest.raises(ValueError, match="requires either a `client` or a `backend`"):
+        build_knowledge_base({"format": "web_fetch", "urls": ["https://example.com"]})
+
+
+def test_config_builds_web_fetch_knowledge_base_with_injected_client():
     client = RecordingClient(
         {"https://example.com/docs": {"content": "Trusted source material for an AI workflow."}}
     )
 
     kb = build_knowledge_base(
         {
-            "format": "linkup_fetch",
+            "format": "web_fetch",
             "urls": ["https://example.com/docs"],
             "client": client,
             "render_js": False,
@@ -98,5 +108,5 @@ def test_config_builds_linkup_fetch_knowledge_base_with_injected_client():
         }
     )
 
-    assert kb.get("linkup-0::0").metadata["source_url"] == "https://example.com/docs"
+    assert kb.get("web-0::0").metadata["source_url"] == "https://example.com/docs"
     assert client.calls[0]["render_js"] is False

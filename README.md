@@ -85,7 +85,7 @@ uv sync --group examples
 # or with pip, choosing the backends you need
 pip install "linear-adapter-trainer[sentence-transformers]"   # local models
 pip install "linear-adapter-trainer[openai]"                  # OpenAI API
-pip install "linear-adapter-trainer[linkup]"                  # Linkup web fetch
+pip install "linear-adapter-trainer[linkup]"                  # optional web-fetch backend
 pip install "linear-adapter-trainer[all]"
 ```
 
@@ -93,14 +93,12 @@ The core install is dependency-light (`numpy`, `torch`, `tqdm`). A
 dependency-free `HashingEmbedder` and `TemplateQueryGenerator` let you run the
 whole pipeline offline (great for CI and demos).
 
-Use the optional Linkup extra when the corpus should come from current public
-web pages instead of local files. Linkup is built for state-of-the-art AI-agent
-search and research workflows: it returns clean, sourced, trusted web content
-and rich snippets that are easier to ground than raw HTML, helping reduce
-hallucination risk in downstream RAG and agent systems. It is also suitable for
-cost-sensitive workflows because of competitive search/research pricing, and
-Linkup offers zero-data-retention options for security- and privacy-sensitive
-use cases.
+When the corpus should come from current public web pages instead of local
+files, use the provider-agnostic `WebLoader`. It fetches each URL through a
+pluggable backend that you supply, so no specific provider is baked into the
+package or its default install. Optional adapters for concrete backends are
+available behind extras (for example `[linkup]`), and you can also pass your own
+fetch client implementing the small `WebFetchClient` interface.
 
 ## Quickstart (Python)
 
@@ -151,14 +149,15 @@ uv run linear-adapter evaluate examples/config.toml   # base vs adapted
 uv run linear-adapter run      examples/config.toml   # generate -> train
 ```
 
-To build the knowledge base from known web pages with Linkup, install the
-optional extra, set `LINKUP_API_KEY`, and switch to
-`examples/linkup_fetch_config.toml`:
+To build the knowledge base from known web pages, switch to
+`examples/web_fetch_config.toml`, which selects a pluggable fetch backend. The
+example uses the optional `linkup` adapter, so install that extra and set its
+key first:
 
 ```bash
 pip install "linear-adapter-trainer[linkup]"
 export LINKUP_API_KEY=...
-uv run linear-adapter generate examples/linkup_fetch_config.toml
+uv run linear-adapter generate examples/web_fetch_config.toml
 ```
 
 Example output (with a Sentence-Transformers backend on a paraphrased query set):

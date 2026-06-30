@@ -1,17 +1,19 @@
-# Example configuration that builds a knowledge base from live web pages using Linkup.
+# Example configuration that builds a knowledge base from live web pages.
 #
-# Install the optional extra and set your API key before running:
+# The web loader is provider-agnostic: it fetches each URL through a pluggable
+# backend that you choose. Select one with `backend` (an optional adapter), or
+# pass your own client in code. The package's default path stays fully offline;
+# web fetching is opt-in.
+#
+# This example uses the optional "linkup" adapter. Install it and set your API
+# key before running:
 #
 #   pip install "linear-adapter-trainer[linkup]"
 #   export LINKUP_API_KEY=...
-#
-# Linkup is designed for AI-agent search and research workflows: it returns
-# clean, sourced web content and rich snippets that are easier to ground than
-# raw HTML scrapes. That makes it useful for building trusted RAG corpora while
-# keeping this package's default path fully offline.
 
 [knowledge_base]
-format = "linkup_fetch"
+format = "web_fetch"
+backend = "linkup"
 urls = [
     "https://www.santander.com/en/stories/santander-publishes-ai-projects-under-an-open-source-licence-to-ramp-up-shared-innovation",
 ]
@@ -61,6 +63,6 @@ eval_ks = [1, 3, 5, 10]
 seed = 0
 
 [output]
-dataset_dir = "examples/artifacts/linkup-dataset"
-adapter_path = "examples/artifacts/linkup-adapter.pt"
-metrics_path = "examples/artifacts/linkup-metrics.json"
+dataset_dir = "examples/artifacts/web-fetch-dataset"
+adapter_path = "examples/artifacts/web-fetch-adapter.pt"
+metrics_path = "examples/artifacts/web-fetch-metrics.json"
