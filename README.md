@@ -85,7 +85,6 @@ uv sync --group examples
 # or with pip, choosing the backends you need
 pip install "linear-adapter-trainer[sentence-transformers]"   # local models
 pip install "linear-adapter-trainer[openai]"                  # OpenAI API
-pip install "linear-adapter-trainer[linkup]"                  # optional web-fetch backend
 pip install "linear-adapter-trainer[all]"
 ```
 
@@ -96,9 +95,9 @@ whole pipeline offline (great for CI and demos).
 When the corpus should come from current public web pages instead of local
 files, use the provider-agnostic `WebLoader`. It fetches each URL through a
 pluggable backend that you supply, so no specific provider is baked into the
-package or its default install. Optional adapters for concrete backends are
-available behind extras (for example `[linkup]`), and you can also pass your own
-fetch client implementing the small `WebFetchClient` interface.
+package or its default install. A dependency-free `http` adapter is included for
+simple cases, and you can also pass your own fetch client implementing the small
+`WebFetchClient` interface.
 
 ## Quickstart (Python)
 
@@ -150,13 +149,10 @@ uv run linear-adapter run      examples/config.toml   # generate -> train
 ```
 
 To build the knowledge base from known web pages, switch to
-`examples/web_fetch_config.toml`, which selects a pluggable fetch backend. The
-example uses the optional `linkup` adapter, so install that extra and set its
-key first:
+`examples/web_fetch_config.toml`, which selects the neutral `http` fetch
+backend:
 
 ```bash
-pip install "linear-adapter-trainer[linkup]"
-export LINKUP_API_KEY=...
 uv run linear-adapter generate examples/web_fetch_config.toml
 ```
 

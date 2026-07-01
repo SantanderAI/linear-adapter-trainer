@@ -1,21 +1,14 @@
 # Example configuration that builds a knowledge base from live web pages.
 #
-# The web loader is provider-agnostic: it fetches each URL through a pluggable
-# backend that you choose. Select one with `backend` (an optional adapter), or
-# pass your own client in code. The package's default path stays fully offline;
-# web fetching is opt-in.
-#
-# This example uses the optional "linkup" adapter. Install it and set your API
-# key before running:
-#
-#   pip install "linear-adapter-trainer[linkup]"
-#   export LINKUP_API_KEY=...
+# The web loader is provider-agnostic. This example uses the dependency-free
+# "http" backend; library users can also pass their own client in code. The
+# package's default path stays fully offline; web fetching is opt-in.
 
 [knowledge_base]
 format = "web_fetch"
-backend = "linkup"
+backend = "http"
 urls = [
-    "https://www.santander.com/en/stories/santander-publishes-ai-projects-under-an-open-source-licence-to-ramp-up-shared-innovation",
+    "https://example.com/",
 ]
 render_js = true
 

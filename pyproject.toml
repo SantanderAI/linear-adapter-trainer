@@ -42,13 +42,9 @@ sentence-transformers = [
 openai = [
     "openai>=1.40.0",
 ]
-linkup = [
-    "linkup-sdk>=0.18",
-]
 all = [
     "sentence-transformers>=3.0.0",
     "openai>=1.40.0",
-    "linkup-sdk>=0.18",
 ]
 
 [project.urls]

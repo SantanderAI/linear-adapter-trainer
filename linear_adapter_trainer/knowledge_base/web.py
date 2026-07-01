@@ -30,9 +30,8 @@ class WebFetchClient(Protocol):
 class WebLoader:
     """Build a :class:`KnowledgeBase` from pages fetched by a pluggable client.
 
-    Pass any ``client`` implementing :class:`WebFetchClient`. No backend is
-    bundled or assumed; optional adapters for specific backends live in
-    :mod:`linear_adapter_trainer.knowledge_base.web_adapters`.
+    Pass any ``client`` implementing :class:`WebFetchClient`, or build a neutral
+    adapter from :mod:`linear_adapter_trainer.knowledge_base.web_adapters`.
     """
 
     client: WebFetchClient

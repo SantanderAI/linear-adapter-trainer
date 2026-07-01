@@ -51,7 +51,7 @@ def build_knowledge_base(spec: dict[str, Any]) -> KnowledgeBase:
             if not backend:
                 raise ValueError(
                     "web_fetch requires either a `client` or a `backend` "
-                    "naming an optional web-fetch adapter (e.g. backend = \"linkup\")."
+                    "naming a web-fetch adapter (e.g. backend = \"http\")."
                 )
             from .knowledge_base.web_adapters import build_web_fetch_client
 

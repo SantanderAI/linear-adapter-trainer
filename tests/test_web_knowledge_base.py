@@ -1,6 +1,8 @@
 # Copyright (c) 2026 Santander Group
 # SPDX-License-Identifier: Apache-2.0
 
+import io
+
 import pytest
 
 from linear_adapter_trainer.config import build_knowledge_base
@@ -86,6 +88,43 @@ def test_web_loader_requires_a_client():
 def test_unknown_web_fetch_backend_is_rejected():
     with pytest.raises(ValueError, match="Unknown web_fetch backend"):
         build_web_fetch_client("does-not-exist")
+
+
+def test_http_web_fetch_backend_fetches_html_with_stdlib(monkeypatch):
+    class FakeResponse(io.BytesIO):
+        def __init__(self):
+            super().__init__(
+                b"<html><head><title>Example</title></head>"
+                b"<body><h1>Heading</h1><p>Clean page text.</p></body></html>"
+            )
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        @property
+        def headers(self):
+            return self
+
+        def get_content_charset(self):
+            return "utf-8"
+
+    def fake_urlopen(request, *, timeout):
+        assert request.full_url == "https://example.com/docs"
+        assert request.get_header("User-agent") == "linear-adapter-trainer/0.1"
+        assert timeout == 3.0
+        return FakeResponse()
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    client = build_web_fetch_client("http", timeout=3.0)
+    response = client.fetch(url="https://example.com/docs", include_raw_html=True)
+
+    assert response["title"] == "Example"
+    assert response["content"] == "Heading Clean page text."
+    assert response["raw_html"].startswith("<html>")
 
 
 def test_web_fetch_config_requires_client_or_backend():

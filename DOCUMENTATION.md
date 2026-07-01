@@ -74,20 +74,17 @@ kb = loader.load_and_split_urls(
 )
 ```
 
-Optional adapters for concrete backends live in
-`linear_adapter_trainer.knowledge_base.web_adapters` and are installed via
-extras. For example, the `linkup` adapter:
+For simple public pages, the package includes a dependency-free `http` backend:
 
 ```bash
-pip install "linear-adapter-trainer[linkup]"
-export LINKUP_API_KEY=...
+uv run linear-adapter generate examples/web_fetch_config.toml
 ```
 
 ```python
 from linear_adapter_trainer import WebLoader
 from linear_adapter_trainer.knowledge_base.web_adapters import build_web_fetch_client
 
-loader = WebLoader(client=build_web_fetch_client("linkup"))
+loader = WebLoader(client=build_web_fetch_client("http"))
 ```
 
 ---
