@@ -223,8 +223,8 @@ Notable changes are tracked in [`CHANGELOG.md`](CHANGELOG.md).
 ## Security
 
 Please report security issues responsibly — see [`.github/SECURITY.md`](.github/SECURITY.md)
-(contact `security-opensource@gruposantander.com` or open a GitHub Security
-Advisory). Do not file public issues for vulnerabilities.
+(use GitHub's private vulnerability reporting, or email
+`opensource@gruposantander.com`). Do not file public issues for vulnerabilities.
 
 ## License
 
