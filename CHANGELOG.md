@@ -20,6 +20,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Export `LLMQueryGenerator` from the top-level package and de-duplicate
   `__all__`.
 
+## [0.1.1] - 2026-07-01
+
+### Security
+- Fix arbitrary code execution when loading adapter checkpoints (CWE-502).
+  `LinearAdapter.load()` now uses `torch.load(..., weights_only=True)` instead
+  of `weights_only=False`, so a crafted `.pt` file can no longer execute code
+  on load. Raised the minimum `torch` to `>=2.10.0` to cover CVE-2025-32434 and
+  CVE-2026-24747, and added a regression test. Reported by Ian Hudson (EPAM
+  Systems) via coordinated disclosure.
+
 ## [0.1.0] - 2026-06-15
 
 ### Added
@@ -37,5 +47,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - TOML-driven CLI (`linear-adapter generate|train|evaluate|run`).
 - Offline-first pipeline, type hints (`py.typed`), and documentation.
 
-[Unreleased]: https://github.com/SantanderAI/linear-adapter-trainer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SantanderAI/linear-adapter-trainer/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/SantanderAI/linear-adapter-trainer/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/SantanderAI/linear-adapter-trainer/releases/tag/v0.1.0

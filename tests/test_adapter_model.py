@@ -1,7 +1,11 @@
 # Copyright (c) 2026 Santander Group
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+import pickle
+
 import numpy as np
+import pytest
 import torch
 
 from linear_adapter_trainer.adapter.losses import TripletLoss
@@ -40,6 +44,26 @@ def test_save_and_load(tmp_path):
     loaded = LinearAdapter.load(path)
     x = torch.randn(3, 4)
     assert torch.allclose(adapter(x), loaded(x), atol=1e-6)
+
+
+def test_load_rejects_malicious_pickle(tmp_path):
+    """A crafted checkpoint must not execute code on load (CWE-502 regression).
+
+    ``LinearAdapter.load`` uses ``weights_only=True``, so a pickle payload that
+    defines ``__reduce__`` must raise instead of running its side effect.
+    """
+    marker = tmp_path / "pwned.txt"
+
+    class _Evil:
+        def __reduce__(self):
+            return (os.system, (f"touch {marker}",))
+
+    evil_path = tmp_path / "evil.pt"
+    torch.save({"config": {"input_dim": 4}, "state_dict": {}, "x": _Evil()}, evil_path)
+
+    with pytest.raises(pickle.UnpicklingError):
+        LinearAdapter.load(evil_path)
+    assert not marker.exists()
 
 
 def test_triplet_loss_zero_when_separated():

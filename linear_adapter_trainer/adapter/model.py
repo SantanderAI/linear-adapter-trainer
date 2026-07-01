@@ -97,7 +97,20 @@ class LinearAdapter(nn.Module):
 
     @classmethod
     def load(cls, path: str | Path, *, map_location: Any = "cpu") -> LinearAdapter:
-        payload = torch.load(path, map_location=map_location, weights_only=False)
+        """Load an adapter previously written by :meth:`save`.
+
+        Checkpoints are read with ``weights_only=True`` so that ``torch.load``
+        never unpickles arbitrary Python objects. The payload written by
+        :meth:`save` is plain primitives plus tensors, which load correctly
+        under the safe allowlist. Combined with the ``torch>=2.10.0`` floor in
+        ``pyproject.toml``, this closes the arbitrary-code-execution vector of
+        the previous ``weights_only=False`` behavior (CWE-502).
+
+        Security note: only load checkpoints from sources you trust. Treat a
+        ``.pt`` file like any other executable artifact and verify its origin
+        (e.g. a SHA-256 checksum) before loading.
+        """
+        payload = torch.load(path, map_location=map_location, weights_only=True)
         adapter = cls(AdapterConfig(**payload["config"]))
         adapter.load_state_dict(payload["state_dict"])
         adapter.eval()

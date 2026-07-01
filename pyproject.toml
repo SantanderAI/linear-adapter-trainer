@@ -1,6 +1,6 @@
 [project]
 name = "linear-adapter-trainer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Train linear embedding adapters with triplet loss to align retrieval embeddings with your queries."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -31,7 +31,9 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=2.0.0",
-    "torch>=2.2.0",
+    # >=2.10.0 required: earlier releases have RCE-class flaws reachable via
+    # torch.load even with weights_only=True (CVE-2025-32434, CVE-2026-24747).
+    "torch>=2.10.0",
     "tqdm>=4.66.0",
 ]
 
