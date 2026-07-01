@@ -40,7 +40,7 @@ from .dataset import (
 )
 from .embeddings import EmbeddingModel, HashingEmbedder
 from .evaluation import RetrievalEvaluator, evaluate_rankings
-from .knowledge_base import Chunk, KnowledgeBase, TextSplitter
+from .knowledge_base import Chunk, KnowledgeBase, TextSplitter, WebLoader
 
 __version__ = "0.1.0"
 
@@ -65,6 +65,7 @@ __all__ = [
     "Triplet",
     "TripletDataset",
     "TripletLoss",
+    "WebLoader",
     "evaluate_rankings",
     "__version__",
 ]

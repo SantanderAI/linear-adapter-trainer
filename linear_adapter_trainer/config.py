@@ -32,15 +32,36 @@ def load_config(path: str | Path) -> dict[str, Any]:
 def build_knowledge_base(spec: dict[str, Any]) -> KnowledgeBase:
     """Instantiate a knowledge base from a ``[knowledge_base]`` table."""
     fmt = spec.get("format", "jsonl")
-    path = spec["path"]
     if fmt == "jsonl":
+        path = spec["path"]
         kb = KnowledgeBase.from_jsonl(
             path,
             text_key=spec.get("text_key", "text"),
             id_key=spec.get("id_key", "id"),
         )
     elif fmt == "directory":
+        path = spec["path"]
         kb = KnowledgeBase.from_directory(path, glob=spec.get("glob", "*.txt"))
+    elif fmt == "web_fetch":
+        from .knowledge_base.web import WebLoader
+
+        client = spec.get("client")
+        if client is None:
+            backend = spec.get("backend")
+            if not backend:
+                raise ValueError(
+                    "web_fetch requires either a `client` or a `backend` "
+                    "naming a web-fetch adapter (e.g. backend = \"http\")."
+                )
+            from .knowledge_base.web_adapters import build_web_fetch_client
+
+            client = build_web_fetch_client(backend)
+        kb = WebLoader(
+            client=client,
+            render_js=spec.get("render_js", True),
+            include_raw_html=spec.get("include_raw_html", False),
+            extract_images=spec.get("extract_images", False),
+        ).load_urls(spec["urls"], ids=spec.get("ids"))
     else:
         raise ValueError(f"Unsupported knowledge_base.format: {fmt!r}")
 

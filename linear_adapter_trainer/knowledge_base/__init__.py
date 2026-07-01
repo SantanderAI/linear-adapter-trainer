@@ -5,5 +5,6 @@
 
 from .base import Chunk, KnowledgeBase
 from .chunking import TextSplitter
+from .web import WebLoader
 
-__all__ = ["Chunk", "KnowledgeBase", "TextSplitter"]
+__all__ = ["Chunk", "KnowledgeBase", "TextSplitter", "WebLoader"]
