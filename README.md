@@ -92,6 +92,13 @@ The core install is dependency-light (`numpy`, `torch`, `tqdm`). A
 dependency-free `HashingEmbedder` and `TemplateQueryGenerator` let you run the
 whole pipeline offline (great for CI and demos).
 
+When the corpus should come from current public web pages instead of local
+files, use the provider-agnostic `WebLoader`. It fetches each URL through a
+pluggable backend that you supply, so no specific provider is baked into the
+package or its default install. A dependency-free `http` adapter is included for
+simple cases, and you can also pass your own fetch client implementing the small
+`WebFetchClient` interface.
+
 ## Quickstart (Python)
 
 ```python
@@ -139,6 +146,14 @@ uv run linear-adapter generate examples/config.toml   # build the dataset
 uv run linear-adapter train    examples/config.toml   # train + report metrics
 uv run linear-adapter evaluate examples/config.toml   # base vs adapted
 uv run linear-adapter run      examples/config.toml   # generate -> train
+```
+
+To build the knowledge base from known web pages, switch to
+`examples/web_fetch_config.toml`, which selects the neutral `http` fetch
+backend:
+
+```bash
+uv run linear-adapter generate examples/web_fetch_config.toml
 ```
 
 Example output (with a Sentence-Transformers backend on a paraphrased query set):

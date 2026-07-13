@@ -1,0 +1,61 @@
+# Example configuration that builds a knowledge base from live web pages.
+#
+# The web loader is provider-agnostic. This example uses the dependency-free
+# "http" backend; library users can also pass their own client in code. The
+# package's default path stays fully offline; web fetching is opt-in.
+
+[knowledge_base]
+format = "web_fetch"
+backend = "http"
+urls = [
+    "https://example.com/",
+]
+render_js = true
+
+[knowledge_base.chunking]
+enabled = true
+chunk_size = 512
+chunk_overlap = 64
+
+[embedder]
+backend = "hashing"
+dimension = 512
+
+[query_generator]
+backend = "template"
+seed = 0
+
+[negative_generator]
+backend = "none"
+
+[dataset]
+queries_per_chunk = 4
+negatives_per_query = 2
+strategy = "mixed"
+pool_size = 8
+val_fraction = 0.25
+split_strategy = "chunk"
+seed = 0
+max_workers = 1
+
+[dataset.mix]
+semantic_opposite = 0.5
+hard = 0.3
+random = 0.2
+
+[training]
+epochs = 30
+batch_size = 32
+learning_rate = 0.005
+margin = 0.2
+distance = "cosine"
+residual = true
+monitor = "mrr"
+patience = 6
+eval_ks = [1, 3, 5, 10]
+seed = 0
+
+[output]
+dataset_dir = "examples/artifacts/web-fetch-dataset"
+adapter_path = "examples/artifacts/web-fetch-adapter.pt"
+metrics_path = "examples/artifacts/web-fetch-metrics.json"

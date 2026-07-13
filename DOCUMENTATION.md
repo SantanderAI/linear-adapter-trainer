@@ -32,11 +32,12 @@ negatives.
 ## Knowledge base
 
 ```python
-from linear_adapter_trainer import KnowledgeBase, Chunk, TextSplitter
+from linear_adapter_trainer import KnowledgeBase, Chunk, TextSplitter, WebLoader
 
 kb = KnowledgeBase.from_jsonl("kb.jsonl")           # {"id","text", ...} per line
 kb = KnowledgeBase.from_texts(["a", "b"], ids=...)  # from raw strings
 kb = KnowledgeBase.from_directory("docs/", glob="*.txt")
+kb = WebLoader(client=my_fetch_client).load_urls(["https://example.com/docs"])
 
 kb.get("chunk-1")        # Chunk lookup by id
 kb.ids, kb.texts         # parallel lists
@@ -55,6 +56,36 @@ chunked_kb = splitter.split_knowledge_base(kb)   # child ids like "doc::0"
 
 The splitter is recursive and separator-aware (`\n\n`, `\n`, `. `, ` `), with
 deterministic output.
+
+### Web ingestion
+
+`WebLoader` builds a corpus from known public web pages. It is provider-agnostic:
+you supply a fetch client implementing the small `WebFetchClient` interface
+(`fetch(url, ...) -> response`), so the backend is your choice and nothing is
+bundled by default.
+
+```python
+from linear_adapter_trainer import WebLoader, TextSplitter
+
+loader = WebLoader(client=my_fetch_client, render_js=True)
+kb = loader.load_and_split_urls(
+    ["https://example.com/docs"],
+    splitter=TextSplitter(chunk_size=512, chunk_overlap=64),
+)
+```
+
+For simple public pages, the package includes a dependency-free `http` backend:
+
+```bash
+uv run linear-adapter generate examples/web_fetch_config.toml
+```
+
+```python
+from linear_adapter_trainer import WebLoader
+from linear_adapter_trainer.knowledge_base.web_adapters import build_web_fetch_client
+
+loader = WebLoader(client=build_web_fetch_client("http"))
+```
 
 ---
 
@@ -216,7 +247,7 @@ Aggregated keys include `precision@k`, `recall@k`, `hit_rate@k`, `ndcg@k`, and
 `linear-adapter <command> config.toml` reads these tables:
 
 ```toml
-[knowledge_base]   # path, format ("jsonl"|"directory"), text_key, id_key, glob
+[knowledge_base]   # path/urls, format ("jsonl"|"directory"|"web_fetch"), backend, text_key, id_key, glob
 [embedder]         # backend, model, dimension/dimensions, device, batch_size
 [query_generator]  # backend ("template"|"llm"), model, temperature (optional), seed
 [dataset]          # queries_per_chunk, negatives_per_query, strategy, pool_size, val_fraction, seed, max_workers
@@ -225,8 +256,9 @@ Aggregated keys include `precision@k`, `recall@k`, `hit_rate@k`, `ndcg@k`, and
 [output]           # dataset_dir, adapter_path, metrics_path
 ```
 
-See [`examples/config.toml`](examples/config.toml) for a complete, runnable
-example.
+See [`examples/config.toml`](examples/config.toml) for a complete offline
+example and [`examples/web_fetch_config.toml`](examples/web_fetch_config.toml)
+for a known-URL web ingestion example.
 
 ---
 
