@@ -88,7 +88,7 @@ pip install "linear-adapter-trainer[openai]"                  # OpenAI API
 pip install "linear-adapter-trainer[all]"
 ```
 
-The core install is dependency-light (`numpy`, `torch`, `tqdm`). A
+The core install is dependency-light (`numpy`, `torch`, `safetensors`, `tqdm`). A
 dependency-free `HashingEmbedder` and `TemplateQueryGenerator` let you run the
 whole pipeline offline (great for CI and demos).
 
@@ -116,7 +116,7 @@ dataset = DatasetGenerator(
 result = AdapterTrainer(kb, embedder, TrainingConfig(epochs=30)).fit(dataset)
 
 print(result.improvement)        # delta per metric vs the base embeddings
-result.adapter.save("adapter.pt")
+result.adapter.save("adapter.safetensors")
 ```
 
 At query time:
@@ -125,10 +125,22 @@ At query time:
 import numpy as np
 from linear_adapter_trainer import LinearAdapter
 
-adapter = LinearAdapter.load("adapter.pt")
+adapter = LinearAdapter.load("adapter.safetensors")
 query_vec = embedder.embed(["how do plants make energy?"])
 adapted = adapter.transform(query_vec)   # use this for nearest-neighbor search
 ```
+
+New checkpoints use safetensors with versioned JSON metadata, so saving and
+loading them does not use pickle. Existing `.pt` and `.pth` checkpoints remain
+readable through PyTorch's restricted `weights_only=True` loader and emit a
+deprecation warning. Migrate one explicitly:
+
+```python
+LinearAdapter.migrate_checkpoint("adapter.pt", "adapter.safetensors")
+```
+
+Checkpoint parsers are selected by extension. A malformed `.safetensors` file
+is rejected and is never retried as a legacy PyTorch checkpoint.
 
 ## Quickstart (CLI)
 

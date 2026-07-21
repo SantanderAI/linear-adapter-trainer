@@ -31,6 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=2.0.0",
+    "safetensors>=0.6.2",
     # >=2.10.0 required: earlier releases have RCE-class flaws reachable via
     # torch.load even with weights_only=True (CVE-2025-32434, CVE-2026-24747).
     "torch>=2.10.0",

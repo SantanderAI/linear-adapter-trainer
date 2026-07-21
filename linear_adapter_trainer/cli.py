@@ -40,9 +40,18 @@ def _output(cfg: dict[str, Any]) -> dict[str, Any]:
     out = cfg.get("output", {})
     return {
         "dataset_dir": out.get("dataset_dir", "artifacts/dataset"),
-        "adapter_path": out.get("adapter_path", "artifacts/adapter.pt"),
+        "adapter_path": out.get("adapter_path", "artifacts/adapter.safetensors"),
         "metrics_path": out.get("metrics_path", "artifacts/metrics.json"),
     }
+
+
+def _validate_adapter_output_path(path: str | Path) -> None:
+    if Path(path).suffix.lower() != ".safetensors":
+        raise ValueError(
+            "Change output.adapter_path to use the '.safetensors' extension. "
+            "Existing '.pt' or '.pth' checkpoints can be converted with "
+            "LinearAdapter.migrate_checkpoint()."
+        )
 
 
 def cmd_generate(cfg: dict[str, Any]) -> TripletDataset:
@@ -72,6 +81,7 @@ def cmd_generate(cfg: dict[str, Any]) -> TripletDataset:
 
 def cmd_train(cfg: dict[str, Any]) -> None:
     out = _output(cfg)
+    _validate_adapter_output_path(out["adapter_path"])
     kb = build_knowledge_base(cfg.get("knowledge_base", {}))
     embedder = build_embedder(cfg.get("embedder", {}))
     dataset = TripletDataset.load(out["dataset_dir"])
@@ -107,6 +117,7 @@ def cmd_evaluate(cfg: dict[str, Any]) -> None:
 
 
 def cmd_run(cfg: dict[str, Any]) -> None:
+    _validate_adapter_output_path(_output(cfg)["adapter_path"])
     cmd_generate(cfg)
     cmd_train(cfg)
 

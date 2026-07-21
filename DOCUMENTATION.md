@@ -149,8 +149,22 @@ adapter = LinearAdapter(AdapterConfig(
     normalize_output=True,  # L2-normalize outputs
 ))
 adapted = adapter.transform(query_matrix)   # numpy in/out for inference
-adapter.save("adapter.pt"); LinearAdapter.load("adapter.pt")
+adapter.save("adapter.safetensors"); LinearAdapter.load("adapter.safetensors")
 ```
+
+Safetensors checkpoints contain the adapter tensors plus a format version and
+strictly validated JSON configuration in the file metadata. New writes must
+use the `.safetensors` extension. Legacy `.pt` and `.pth` checkpoints are read
+only through `torch.load(..., weights_only=True)` and emit a deprecation
+warning. Convert them with:
+
+```python
+LinearAdapter.migrate_checkpoint("adapter.pt", "adapter.safetensors")
+```
+
+`load(..., map_location=...)` accepts a device string or `torch.device` for
+safetensors checkpoints. Parser selection is extension-based; corrupt
+safetensors files never fall back to the legacy loader.
 
 A residual adapter starts as a no-op (`W = 0`), so early training never hurts
 the base embeddings. A non-residual square adapter is initialized at identity.
