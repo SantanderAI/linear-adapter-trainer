@@ -15,7 +15,7 @@ code is public; keep it explicit, typed, and easy to read.
 - Keep defaults deterministic and seeded.
 - Avoid hidden behavior and side effects.
 - Add a dependency only when it removes real complexity. Core stays light
-  (`numpy`, `torch`, `tqdm`); heavy backends are optional extras.
+  (`numpy`, `torch`, `safetensors`, `tqdm`); heavy backends are optional extras.
 - The pipeline must run fully offline via `HashingEmbedder` +
   `TemplateQueryGenerator` so CI never needs network or API keys.
 

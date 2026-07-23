@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- `LinearAdapter.migrate_checkpoint()` for converting legacy `.pt` and `.pth`
+  checkpoints to safetensors.
 - Santander demo notebook (`examples/santander_retrieval_demo.ipynb`): scrape a
   real corpus, generate a QA dataset, train the adapter, and measure the
   retrieval improvement end-to-end.
@@ -17,6 +19,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Offline unit tests for the scraper's HTML cleaning.
 
 ### Changed
+- **Breaking:** `LinearAdapter.save()` now writes only pickle-free
+  `.safetensors` checkpoints with versioned, strictly validated JSON metadata.
+  Legacy `.pt` and `.pth` checkpoints remain read-only through
+  `torch.load(..., weights_only=True)`. The CLI default output path now ends in
+  `.safetensors`, and configured legacy output extensions fail before training.
 - Export `LLMQueryGenerator` from the top-level package and de-duplicate
   `__all__`.
 
